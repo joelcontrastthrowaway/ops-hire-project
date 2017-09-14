@@ -1,0 +1,13 @@
+- name: Turn on UFW
+  ufw: 
+    state: enabled
+
+- name: Turn on specific UFW rules
+  become: yes
+  ufw:
+    rule: "{{ item.rule }}" 
+    port: "{{ item.port }}"
+    proto: "{{ item.proto }}"
+    direction: "{{ item.direction }}"
+    src: "{{ item.src | default(omit) }}"
+  with_items: "{{ ufw_rules }}"

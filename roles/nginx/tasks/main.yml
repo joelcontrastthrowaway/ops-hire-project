@@ -1,0 +1,36 @@
+- name: Add nginx repo key
+  become: yes
+  apt_key: url="http://keyserver.ubuntu.com:11371/pks/lookup?op=get&search=0x00A6F0A3C300EE8C"
+
+- name: Add nginx repo
+  become: yes
+  apt_repository: repo="deb http://ppa.launchpad.net/nginx/development/ubuntu trusty main"
+  register: add_nginx 
+
+- name: Update cache
+  become: yes
+  apt_repository: repo="deb http://ppa.launchpad.net/nginx/development/ubuntu trusty main"  update_cache=yes
+  when: add_nginx|changed
+
+- name: Install nginx and various dependencies
+  become: yes
+  apt: name={{ item }} state=present
+  with_items:
+    - nginx
+    - nginx-common
+    - nginx-extras
+    - php5-fpm
+
+- name: Remove the default nginx site
+  become: yes
+  file: path=/etc/nginx/sites-enabled/default state=absent
+  notify: reload nginx
+
+- name: Update nginx.conf
+  become: yes
+  template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf
+  notify: restart nginx
+
+- name: Start nginx at boot
+  become: yes
+  service: name=nginx enabled=yes state=started

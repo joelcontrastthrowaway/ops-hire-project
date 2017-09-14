@@ -1,4 +1,3 @@
-
 - hosts: all
   become: True
   roles:
@@ -7,13 +6,12 @@
 - hosts: database
   become: True
   roles:
+    - ufw
     - { role: mysql, tags: ['mysql'] }
 
 - hosts: appserver
   become: True
   roles:
-    - { role: apache, tags: ['apache'] }
+    - ufw
+    - nginx
     - { role: webapp, tags: ['webapp'] }
-
-
-

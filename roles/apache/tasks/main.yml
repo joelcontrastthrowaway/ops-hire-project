@@ -3,7 +3,7 @@
 
 - name: Install apache via apt
   apt: name={{ item }} update_cache=yes
-  become_method: sudo
+  become: yes
   with_items:
      - apache2
      - libapache2-mod-auth-mysql 

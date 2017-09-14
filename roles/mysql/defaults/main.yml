@@ -1,2 +1,1 @@
----
-# defaults file for mysql
+database_port: 3306

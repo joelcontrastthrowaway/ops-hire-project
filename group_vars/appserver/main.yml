@@ -1,0 +1,13 @@
+ufw_rules:
+  - rule: allow
+    port: 22
+    proto: tcp
+    direction: in
+  - rule: allow
+    port: 80
+    proto: tcp
+    direction: in
+  - rule: allow
+    port: 443
+    proto: tcp
+    direction: in

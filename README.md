@@ -15,7 +15,6 @@ At Contrast we like to play hard, work hard, and automate our Saas environment e
 
 Before we start, install these packages on your computer
 
-* ansible
 * vagrant
 * virtualbox
 

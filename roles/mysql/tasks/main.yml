@@ -3,20 +3,22 @@
 
 - name: Install MySQL server
   apt: name={{ item }} update_cache=yes cache_valid_time=3600 state=present
-  become_method: sudo
+  become: yes
   with_items:
     - python-mysqldb
     - mysql-server
 
+# XXX TODO Dynamically fill out mysql address
 - name: Configure private bind address for database server
-  lineinfile: dest=/etc/mysql/my.cnf regexp='^bind-address' line='bind-address=192.168.50.5'
+  template: src=my.cnf.j2  dest=/etc/mysql/my.cnf 
+  notify: restart mysql
 
-- name: Restart MySQL
-  service: name=mysql state=restarted
- 
-- name: Create database user
-  command: mysql -u root -e "{{ item }}"
-  with_items:
-     - "CREATE USER '{{ database_user}}'@'192.168.50.4' IDENTIFIED BY '{{ database_password }}';"
-     - "GRANT ALL PRIVILEGES ON *.* TO '{{ database_user }}'@'192.168.50.4';" 
+# XXX TODO Dynamically fill out mysql address
+- mysql_user:
+    name: "{{ database_user }}" 
+    password: "{{ database_password }}" 
+    encrypted: no 
+    priv: '*.*:ALL'
+    host: 192.168.50.4
+    state: present
 

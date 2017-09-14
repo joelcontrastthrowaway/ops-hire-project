@@ -1,5 +1,12 @@
 ---
 # tasks file for finv-app
+- name: Install various dependencies 
+  apt: 
+    name: "{{ item }}" 
+  with_items:
+    - python-pip
+    - python-mysqldb
+    - php5-mysql
 
 - name: Remove  html directory
   file: path=/var/www/html state=absent
@@ -11,14 +18,30 @@
     repo=https://github.com/edlangley/inventory-webapp.git
     update=yes
 
+# XXX TODO use a variable for login_host
 - name: Create database
-  shell: mysql -u {{ database_user }} -p{{ database_password }} -h 192.168.50.5 --protocol=tcp -e "create database if not exists {{ database_name }}"
+  mysql_db:
+    name: "{{ database_name }}"
+    login_host: 192.168.50.5
+    login_user: "{{ database_user }}"
+    login_password: "{{ database_password }}"
+    login_port: "{{ database_port }}"
+    target: "/var/www/html/sql-db-sample/electronics.sql"
+    state: import
 
-- name: Load application schema
-  shell: mysql -u {{ database_user }} -p{{ database_password }} -h 192.168.50.5 --protocol=tcp {{ database_name }}  < /var/www/html/sql-db-sample/electronics.sql
+# XXX TODO investigate if this just makes a bunch of rows of the same value (probably does)
+# XXX TODO use a variable for host
+- name: Create admin user 
+  shell: mysql -u {{ database_user }} -p{{ database_password }} -h 192.168.50.5 --port={{ database_port }} --protocol=tcp {{ database_name }} -e "INSERT INTO admin_users (user_name,password) VALUES ('admin','admin');"
 
-- name: Create database
-  shell: mysql -u {{ database_user }} -p{{ database_password }} -h 192.168.50.5 --protocol=tcp {{ database_name }} -e "INSERT INTO admin_users (user_name,password) VALUES ('admin','admin');"
 
 - name: Setup dbconfig
   template: src=admin-auth.php.j2 dest=/var/www/html/php/admin-auth.php
+
+- name: Template out nginx config
+  template: src=site.conf.j2 dest=/etc/nginx/sites-available/site.conf
+  notify: reload nginx
+
+- name: Enable the nginx site config
+  file: state=link src=/etc/nginx/sites-available/site.conf dest=/etc/nginx/sites-enabled/site.conf
+  notify: reload nginx

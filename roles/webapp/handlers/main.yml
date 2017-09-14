@@ -1,2 +1,5 @@
 ---
 # handlers file for finv-app
+- name: reload nginx
+  become: yes
+  command: nginx -s reload

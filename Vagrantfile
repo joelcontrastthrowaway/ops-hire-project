@@ -21,9 +21,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
  
 
-  config.vm.provision "ansible" do |ansible|
+  config.vm.provision "ansible_local" do |ansible|
      ansible.sudo = true
      ansible.playbook = "site.yml"
+     ansible.groups = {
+       "database" => ["database"],
+       "appserver" => ["appserver"],
+       "vagrant" => ["database", "appserver"]
+     }
   end
 
 end
