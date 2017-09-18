@@ -2,6 +2,16 @@
   ufw: 
     state: enabled
 
+- name: test 04
+  debug:
+    var: hostvars['appserver']['ansible_eth1']['ipv4']['address']
+
+- name: test 05
+  debug:
+    var: groups[item.src]
+  with_items: "{{ ufw_rules }}"
+  when: item.src is defined
+
 - name: Turn on specific UFW rules
   become: yes
   ufw:
@@ -9,5 +19,16 @@
     port: "{{ item.port }}"
     proto: "{{ item.proto }}"
     direction: "{{ item.direction }}"
-    src: "{{ item.src | default(omit) }}"
   with_items: "{{ ufw_rules }}"
+  when: item.src is undefined
+
+- name: Turn on specific UFW rules with a specific src
+  become: yes
+  ufw:
+    rule: "{{ item.rule }}" 
+    port: "{{ item.port }}"
+    proto: "{{ item.proto }}"
+    direction: "{{ item.direction }}"
+    src: "{{ hostvars[groups[item.src][0]]['ansible_eth1']['ipv4']['address'] }}"
+  with_items: "{{ ufw_rules }}"
+  when: item.src is defined 

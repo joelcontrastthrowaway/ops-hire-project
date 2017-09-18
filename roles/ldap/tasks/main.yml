@@ -1,0 +1,6 @@
+- name: Install a ldap server and various dependencies
+  become: yes
+  apt: name={{ item }} state=present
+  with_items:
+    - slapd 
+    - ldap-utils

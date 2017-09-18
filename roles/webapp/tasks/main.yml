@@ -18,11 +18,10 @@
     repo=https://github.com/edlangley/inventory-webapp.git
     update=yes
 
-# XXX TODO use a variable for login_host
 - name: Create database
   mysql_db:
     name: "{{ database_name }}"
-    login_host: 192.168.50.5
+    login_host: "{{ hostvars[groups['database'][0]]['ansible_eth1']['ipv4']['address'] }}"
     login_user: "{{ database_user }}"
     login_password: "{{ database_password }}"
     login_port: "{{ database_port }}"
@@ -30,13 +29,12 @@
     state: import
 
 # XXX TODO investigate if this just makes a bunch of rows of the same value (probably does)
-# XXX TODO use a variable for host
 - name: Create admin user 
-  shell: mysql -u {{ database_user }} -p{{ database_password }} -h 192.168.50.5 --port={{ database_port }} --protocol=tcp {{ database_name }} -e "INSERT INTO admin_users (user_name,password) VALUES ('admin','admin');"
+  shell: mysql -u {{ database_user }} -p{{ database_password }} -h {{ hostvars[groups['database'][0]]['ansible_eth1']['ipv4']['address'] }} --port={{ database_port }} --protocol=tcp {{ database_name }} -e "INSERT INTO admin_users (user_name,password) VALUES ('admin','admin');"
 
-
+  # We use two template calls instead of one due to the notify
 - name: Setup dbconfig
-  template: src=admin-auth.php.j2 dest=/var/www/html/php/admin-auth.php
+  template: src=admin-auth.php.j2 dest=/var/www/html/php/admin-auth.php owner=www-data group=www-data mode="0600"
 
 - name: Template out nginx config
   template: src=site.conf.j2 dest=/etc/nginx/sites-available/site.conf

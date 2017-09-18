@@ -1,0 +1,44 @@
+- name: Install various dependencies 
+  apt: 
+    name: "{{ item }}" 
+    state: latest
+  with_items:
+    - python-pip
+    - python-dev
+    - libffi-dev
+    - libssl-dev
+
+- name: Install the latest version of PyOpenSSL
+  become: yes
+  pip:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - pyOpenSSL
+
+- name: Make directories for various ssl files 
+  file:
+    path: "/etc/ssl/{{ item }}"
+    state: directory
+  with_items:
+    - csr
+    - public
+    - crt 
+
+- name: Generate a private key
+  become: yes
+  openssl_privatekey:
+    path: /etc/ssl/private/{{ ssl_file_prefix }}_private.pem
+
+- name: Generate a certificate signing requests 
+  openssl_csr:
+    path: /etc/ssl/csr/{{ ssl_file_prefix }}.csr
+    privatekey_path: /etc/ssl/private/{{ ssl_file_prefix }}_private.pem
+    common_name: www.ansible.com
+
+- name: Sign the CSR 
+  openssl_certificate:
+    path: /etc/ssl/crt/{{ ssl_file_prefix }}.crt
+    privatekey_path: /etc/ssl/private/{{ ssl_file_prefix }}_private.pem
+    csr_path: /etc/ssl/csr/{{ ssl_file_prefix }}.csr
+    provider: selfsigned

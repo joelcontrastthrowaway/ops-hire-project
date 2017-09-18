@@ -1,0 +1,13 @@
+- name: Install fail2ban and various dependencies
+  become: yes
+  apt: 
+    name: fail2ban
+
+- name: Copy up our config file 
+  become: yes
+  copy:
+    src: jail.conf 
+    dest: /etc/fail2ban/jail.conf
+    owner: root
+    group: root
+    mode: "0644"

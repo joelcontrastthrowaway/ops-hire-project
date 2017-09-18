@@ -2,6 +2,8 @@
   become: True
   roles:
     - { role: base, tags: ['base'] }
+    - newrelic
+    - fail2ban 
 
 - hosts: database
   become: True
@@ -13,5 +15,12 @@
   become: True
   roles:
     - ufw
-    - nginx
-    - { role: webapp, tags: ['webapp'] }
+    - { role: ssl, ssl_file_prefix: demo_site }
+    - { role: nginx, ssl_file_prefix: demo_site }
+    - { role: webapp, ssl_file_prefix: demo_site, tags: ['webapp'] }
+
+- hosts: ldapserver
+  become: True
+  roles:
+    - ufw
+    - ldap

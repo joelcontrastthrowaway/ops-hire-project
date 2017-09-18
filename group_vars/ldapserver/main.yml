@@ -4,7 +4,12 @@ ufw_rules:
     proto: tcp
     direction: in
   - rule: allow
-    port: "{{ database_port }}" 
+    port: 389 
     proto: tcp
     direction: in
     src: appserver
+  - rule: allow
+    port: 389 
+    proto: tcp
+    direction: in
+    src: database

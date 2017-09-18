@@ -44,8 +44,7 @@ skip-external-locking
 #
 # Instead of skip-networking the default is now to listen only on
 # localhost which is more compatible and is not less secure.
-# XXX TODO template this out, based on the hosts ip
-bind-address            = 192.168.50.5 
+bind-address            = {{ hostvars[groups['database'][0]]['ansible_eth1']['ipv4']['address'] }}
 #
 # * Fine Tuning
 #

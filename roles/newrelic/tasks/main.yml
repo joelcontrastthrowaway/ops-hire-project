@@ -1,0 +1,50 @@
+# XXX TODO - This could be an inline vaulted value in defaults now
+- include_vars: ../defaults/new_relic_license_key.yml
+
+- name: Set up the new relic server agent apt repo key
+  apt_key:
+    keyserver: keyserver.ubuntu.com
+    id: 548C16BF
+
+- name: Set up the new relic infrastructure agent apt repo key
+  apt_key:
+    url: https://download.newrelic.com/infrastructure_agent/gpg/newrelic-infra.gpg
+    state: present
+
+- name: Set up the new relic apt repos
+  apt_repository:
+    repo: "{{ item }}"
+    update_cache: yes
+  with_items:
+    - "deb http://apt.newrelic.com/debian/ newrelic non-free"
+    - "deb [arch=amd64] http://download.newrelic.com/infrastructure_agent/linux/apt trusty main"
+
+- name: Install new relic agents
+  apt:
+    name: "{{ item }}"
+  with_items:
+    - newrelic-sysmond
+    - newrelic-infra
+
+- name: Install new relic config files
+  template:
+    src: "{{ item.src }}.j2" 
+    dest: "{{ item.dest }}"
+    owner: newrelic
+    group: newrelic
+    mode: "0640"
+  with_items:
+    - src: nrsysmond.cfg
+      dest: /etc/newrelic/nrsysmond.cfg
+    - src: newrelic-infra.yml
+      dest: /etc/newrelic-infra.yml
+
+# XXX TODO - State intentionally stopped as there's no valid license key
+- name: Enable new relic on boot
+  service: 
+    name: "{{ item }}"
+    enabled: yes
+    state: stopped
+  with_items:
+    - newrelic-sysmond
+    - newrelic-infra

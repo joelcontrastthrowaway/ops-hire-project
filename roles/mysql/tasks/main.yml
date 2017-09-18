@@ -8,12 +8,10 @@
     - python-mysqldb
     - mysql-server
 
-# XXX TODO Dynamically fill out mysql address
 - name: Configure private bind address for database server
   template: src=my.cnf.j2  dest=/etc/mysql/my.cnf 
   notify: restart mysql
 
-# XXX TODO Dynamically fill out mysql address
 - mysql_user:
     name: "{{ database_user }}" 
     password: "{{ database_password }}" 
